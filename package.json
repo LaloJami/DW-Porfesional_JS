@@ -1,0 +1,18 @@
+{
+  "name": "profesional_js",
+  "version": "1.0.0",
+  "description": "Curso profesional de JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "JavaScript",
+    "node"
+  ],
+  "author": "Lalo Jami <eduardolalojami@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "liveserver": "^0.1.20"
+  }
+}
