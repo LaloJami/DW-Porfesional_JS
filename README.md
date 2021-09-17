@@ -54,3 +54,32 @@ Esta es la parte más importante de ser un profesional. Un buen profesional cump
 
 La experiencia no es algo que se pueda enseñar, tenemos que encontrarla nosotros mismos en el camino a ser profesionales. Todo está en nosotros, tenemos que estudiar y practicar mucho.
 
+# ¿Cómo llega un script al navegador?
+El DOM es la representación que hace el navegador de un documento HTML.
+
+El navegador interpreta el archivo HTML y cuando termina de transformarlo al DOM se dispara el evento ``DOMContentLoaded`` lo que significa que todo el documento está disponible para ser manipulado.
+
+Todo script que carguemos en nuestra página tiene un llamado y una ejecución.
+
+Tanto con ``async`` como ``defer`` podemos hacer llamados asíncronos, pero tiene sus diferencias:
+
+* ``async``. Con async podemos hacer la petición de forma asíncrona y no vamos a detener la carga del DOM hasta que se haga la ejecución del código.
+* ``defer``. La petición es igual, asíncrona como en el async pero va a deferir la ejecución del Javascript hasta el final de que se cargue todo el documento.
+* **scripts embebidos**: el navegador carga línea a línea el HTML y cuando se encuentra un código entre scripts va a detener su ejecución hasta que haya procesado todo el script.
+
+Hay que tener en cuenta que, cuando carga una página y se encuentra un script a ejecutar, toda la carga se detiene. Por eso se recomienda agregar tus scripts justo antes de cerrar el body para que todo el documento este disponible.
+
+# Scope
+El Scope o ámbito es lo que define el tiempo de vida de una variable, en que partes de nuestro código pueden ser usadas.
+
+## Global Scope
+Variables disponibles de forma global se usa la palabra var, son accesibles por todos los scripts que se cargan en la página y se declaran fuera de una función o bloque. Aquí hay mucho riesgo de sobreescritura.
+
+## Function Scope
+Variables declaradas dentro de una función utilizando var sólo visibles dentro de ella misma (incluyendo los argumentos que se pasan a la función).
+
+## Block Scope
+Variables definidas dentro de un bloque, por ejemplo variables declaradas dentro un loop while o for. Se usa let y const para declarar este tipo de variables.
+
+## Module Scope
+Cuando se denota un script de tipo module con el atributo type="module las variables son limitadas al archivo en el que están declaradas.
