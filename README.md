@@ -359,4 +359,198 @@ Array.prototype.forEach.call(buttons, button => {
   button.onclick = () => alert('Nunca pares de aprender');
 })
 ```
+# Prototype
+Si hay un tema que hace que a todos los desarrolladores de javascript nos explote la cabeza de lo difícil que es, es este: Prototype es un concepto casi único de javascript que es parte de como normalmente manejamos lenguajes y objetos en lenguajes de programación, las clases son como un plano en Java, lo escribimos y luego instanciamos objetos, si queremos crear una clase que hereda de otra clase y volvemos a instanciar otros objetos, pero en javascript todos son objetos.
 
+* Ejemplo de objeto comú y corriente:
+```js
+// Un objeto común y corriente
+const zelda = {
+  name: "Zelda"
+}
+zelda.saludar = function () {
+  console.log(`Hola soy ${this.name}`);
+}
+zelda.saludar();
+
+const link = {
+  name: "Link"
+}
+link.saludar = function () {
+  console.log(`Hola soy ${this.name}`);
+}
+link.saludar();
+```
+Esto es algo ineficiente, estamos creando una función por cada uno de los 2 objetos y además los objetos son similares y los tenemos que escribir a mano.
+* Escribiendo una función que haga más eficiente a nuestro objeto.
+```js
+// Seamos un poco más eficientes
+function Hero(name) {
+  const hero = {
+    name: name,
+  }
+  hero.saludar = function () {
+    console.log(`Hola soy ${this.name}`);
+  }
+
+  return hero;
+}
+const zelda = Hero('Zelda');
+zelda.saludar();
+
+const link = Hero("Link");
+link.saludar();
+```
+Aquí hay un poco de ineficiencia, ya que esta función saludar la estamos definiendo cada vez llamamos a Hero.
+
+Podemos ser un poco más eficientes y tener un método que tenga la colección de métodos para los Heros
+* Aun podemos mejorar más y evitar tener que crear la misma función cada vez
+
+Lo logramos creando un objeto externo llamado heroMethods, el cual tiene una función saludar como propiedad, la cual solo se está definiedo una sola vez. Y a nuestro objeto hero en su método saludar solo le pasamos la referencia de el objeto externo heroMethods.saludar
+```js
+// Aun podemos mejorar más y evitar tener que crear la misma función cada vez
+const heroMethods = {
+  saludar: function () {
+    console.log(`Me llamó ${this.name}`);
+  }
+}
+function Hero(name) {
+  const hero = {
+    name: name,
+  }
+  hero.saludar = heroMethods.saludar;
+
+  return hero;
+}
+const zelda = Hero('Zelda');
+zelda.saludar();
+
+const link = Hero("Link");
+link.saludar();
+```
+## Object create
+Recibe un objeto y lo que hace es crear un nuevo objeto, como lo dice su nombre
+```js
+const nuevoObjeto = Object.create({});
+```
+Este nuevo objeto va a contener todas las propiedades que este objeto tiene definido, esto la da algo parecido a 'super poderes'. Usando el ejemplo de prototypes quedaría de la siguiente manera:
+```js
+// Object create
+const heroMethods = {
+  saludar: function () {
+    console.log(`Soy un super heroe ${this.name}`);
+  }
+}
+function Hero(name) {
+  const hero = Object.create(heroMethods);
+  hero.name = name;
+
+  return hero;
+}
+const zelda = Hero('Zelda');
+zelda.saludar();
+
+const link = Hero("Link");
+link.saludar();
+```
+
+Analícemos lo que esta haciendo object create, porque va más allá de copiar propiedades de un objeto a uno nuevo. Si nostros ejecutamos al objeto zelda y a heroMethods, nos aparecerán 2 objetos tal cual como los habíamos definido.
+
+Si intentamos crear un nuevo objeto directo desde la consola del navegador pasará algo interesante.
+```js
+zelda
+heroMethods
+const newHero = Object.create(heroMethods);
+```
+Cuando nosotros creamos un nuevo objeto con ``Object.create`` nuestro objeto aparentemente se mostrará vacío, pero si nosotros intentamos ingresar a una propiedad del objeto sí aparecerá definido. Esto es gracias a un objeto que sí se nos imprimió, el cual aparece dentro del nuevo objeto con un color azul desvanecido el cual se llama proto.
+
+Nostros accedemos a newHero.saludar sin estar definido dentro del objeto mismo, esto sucede gracias a la herencia prototipal. Por ahora basta con que entendamos que todo lo que estaba en heroMethods pasó al proto de newHero
+
+Modificaremos el object Hero agregando la función saludar de heroMethods porque la propiedad saludar le debería pertenecer a Hero, ya que es una función que esta ocupando el objeto. El lugar para hacer esto que se nos recomienda es hacerlo dentro de su método prototype, inicialmente prototype es un objeto vacío. Pero como es un objeto le podemos añadir nuevas propiedades
+
+```js
+// Métodos de Hero dentro de Hero
+function Hero(name) {
+  const hero = Object.create(Hero.prototype);
+  hero.name = name;
+  return hero;
+}
+
+Hero.prototype.saludar = function () {
+  console.log(`Soy una super heroina ${this.name}`);
+}
+
+const zelda = Hero('Zelda');
+zelda.saludar();
+
+const link = Hero("Link");
+link.saludar();
+```
+* new es un atajo (azúcar sintáctica) para llevar Hero.prototype al objeto
+
+Seguro has usado un keyword que se llamá new. Desde ahora te advierto que new es un atajo lo que le llamamos azúcar sintáctica, es decir, es algo que le añadimos al lenguaje para facilitar algunos procesos, pero son cosas que ya podemos hacer y justo tiene que ver con Object.create.
+
+Primero comenzamos añadiendo new cada vez que queremos instanciar un nuevo objeto.
+```js
+const zelda = new Hero('Zelda');
+zelda.saludar();
+```
+new es lo mismo que hacer esto:
+```js
+function Hero(name) {
+  const hero = Object.create(Hero.prototype);
+  hero.name = name;
+  return hero;
+}
+const zelda = new Hero('Zelda');
+zelda.saludar();
+```
+Cada vez que usamos new este atajo de Object.create ocurre autómaticamente:
+```js
+function Hero(name) {
+  // Object.create Ocurre automáticamente cada vez que utilizamos new y no necesitamos ponerlo
+  // const hero = Object.create(Hero.prototype);
+  this = Object.create(Hero.prototype);
+  hero.name = name;
+  return this;
+}
+const zelda = new Hero('Zelda');
+zelda.saludar();
+```
+La regla que usa new cuando hace el Object.create es que siempre va a sacar el prototype de lo que sea el constructor, si después de new dice hero ``new Hero``
+
+Lo que hará será un ``Hero.prototype``, no existe otro. Y en lugar de guardarlo en hero sirve imaginarnos que lo va a guardar en this. Este this se va a inicializar, no lo haremos nosotros directamente, lo está haciendo el lenguaje, entonces sí se vale y en lugar de decir ``hero.name`` hacemos: ``this.name``. Siempre la clase o función clase lo que hará siempre será retornarnos this implícitamente.
+
+Lo que acabamos de hacer es: tienes un objeto simple, donde nos las inventamos para crear nuevos objetos, y fuimos arreglando algunas ineficiencias hasta llegar a Object.create y new, que solo es sugar-sintaxs para Object.create. Esto es lo que ocurre cada vez que construimos un constructor en una función o cuando escribimos Hero.prototype.
+
+Hoy en día hay nuevas formas de hacerlo, usando el keyword ``class`` internamente, definimos los métodos, definimos un constructor, todo esto es también sugar-syntax que vale la pena y es muy importante entender cómo funciona nativamente para ver cómo es que nuestro lenguaje se está comportando.
+
+# Herencia Prototipal
+Por default los objetos en JavaScript tienen como prototipo a Object, que es el punto de partida de todos los objetos, es el prototipo padre. Object es la raíz de todo, por lo tanto tiene un prototipo padre undefined.
+
+Cuando se llama a una función o variable que no se encuentra en el mismo objeto que la llamó, se busca en toda la prototype chain hasta encontrarla o regresar undefined.
+
+La función ``hasOwnProperty`` sirve para verificar si una propiedad es parte del objeto o si viene heredada desde su prototype chain.
+```js
+function Hero(name) {
+  this.name = name;
+}
+
+Hero.prototype.saludar = function () {
+  console.log(`Hola, soy ${this.name}`);
+}
+
+const zelda = new Hero('Zelda');
+
+// Propiedades de la instancia
+console.log(`New: ${zelda.name} `);
+// Propiedades de la "clase".
+console.log(`saludar: ${zelda.saludar} `);
+
+// Propiedades heredadas de ej: toString
+console.log('toString: ', zelda.toString);
+
+// hasOwnProperty (de dónde sale toString o esto?)
+console.log('zelda.hasOwnProperty("name"): ', zelda.hasOwnProperty('name'));
+console.log('zelda.hasOwnProperty("saludar"): ', zelda.hasOwnProperty('saludar'));
+```
