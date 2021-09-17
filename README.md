@@ -73,7 +73,7 @@ Hay que tener en cuenta que, cuando carga una página y se encuentra un script a
 El Scope o ámbito es lo que define el tiempo de vida de una variable, en que partes de nuestro código pueden ser usadas.
 
 ## Global Scope
-Variables disponibles de forma global se usa la palabra var, son accesibles por todos los scripts que se cargan en la página y se declaran fuera de una función o bloque. Aquí hay mucho riesgo de sobreescritura.
+Variables disponibles de forma global se usa la palabra ``var``, son accesibles por todos los scripts que se cargan en la página y se declaran fuera de una función o bloque. Aquí hay mucho riesgo de sobreescritura.
 
 ## Function Scope
 Variables declaradas dentro de una función utilizando var sólo visibles dentro de ella misma (incluyendo los argumentos que se pasan a la función).
@@ -82,4 +82,64 @@ Variables declaradas dentro de una función utilizando var sólo visibles dentro
 Variables definidas dentro de un bloque, por ejemplo variables declaradas dentro un loop while o for. Se usa let y const para declarar este tipo de variables.
 
 ## Module Scope
-Cuando se denota un script de tipo module con el atributo type="module las variables son limitadas al archivo en el que están declaradas.
+Cuando se denota un script de tipo module con el atributo ``type="module"`` las variables son limitadas al archivo en el que están declaradas.
+
+# Closure
+
+El scope cuando lo juntamos con funciones podemos lograr algo que se llama clouseres o clausuras, para entender bien vemos un ejemplo:
+```js
+// Clouseres
+// printColor
+let color = 'green';
+function printColor() {
+  console.log(color);
+}
+```
+Podemos observar que la variable ```color``` está en el scope global, para evitar eso lo que vamos a hacer es crear una función que se va a llamár autómaticamente
+```js
+// IIFE: immediately invoked function expression
+(function () {
+  let color = 'green';
+
+  function printColor() {
+    console.log(color);
+  }
+
+  printColor();
+})();
+```
+Sacamos este codigó del entorno global, lo pasamos a uno de una función y entonces color no cruza al scope global. Cuando tenemos esta declaración y esta ejecución que se declara afuera de la función interna, estó es un Closures. Es la combinación del scope de una función y el scope donde fue definida, donde el scope de la función es la función IIFE la función principal, y adentro la función que fue definida dentro de ese scope que tiene acceso a lo que estaba afuera.
+
+Clouseres nos va a permitir tener una funcionalidad o feature que el lenguaje no trae: variables privadas
+```js
+// Clousers Jasan Hernández.
+// ¿Variables privadas?
+const counter1 = {
+  count: 3
+}
+// count está en el scope Global Window
+console.log(counter1.count);
+// Podemos modificar su valor si quisiéramos
+counter1.count = 99;
+console.log(counter1.count);
+
+// Clouseres - creamos un function scope
+function makeCounter(n) {
+  // count ya no existe en window, ahora
+  // solo pertenece a la función
+  let count = n;
+  return {
+    increase: function () { count += 1; },
+    decrease: function () { count -= 1},
+    getCount: function () { return count; },
+  }
+}
+let counter = makeCounter(7);
+console.log('This count is:', counter.getCount());
+console.log('This count is:', counter.increase());
+console.log('This count is:', counter.decrease());
+// No podemos cambiar el valor de count porque no 
+// está en nuestro alcance.
+// ERROR FATAL
+counter.count = 99;
+```
