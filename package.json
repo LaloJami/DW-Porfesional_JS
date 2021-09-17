@@ -4,7 +4,7 @@
   "description": "Curso profesional de JavaScript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "live-server"
   },
   "keywords": [
     "JavaScript",
@@ -12,7 +12,7 @@
   ],
   "author": "Lalo Jami <eduardolalojami@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
-    "liveserver": "^0.1.20"
+  "dependencies": {
+    "live-server": "^1.2.1"
   }
 }
