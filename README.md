@@ -596,6 +596,213 @@ Google, una compañía con productos sumamente complejos como Google Maps, neces
 4. Se optimiza a machine code y se remplaza el código base.
 Mirando un grafo con este orden usando V8.
 ![grafo](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LlTyKe9xd6RJ6x5f2-z%2F-LoBMLhD1_J2PtZzvrDo%2F-LoBMsLB7cpFBtb-EZ9L%2FScreenshot_11.png?alt=media&token=bc179ac3-ae0f-4c89-b10c-b1fae0986f80)
+Javascript source code pasa por el parser donde obtenemos el AST, después el AST se lo damos al interpretador que va a producir bytecode, ahí es donde comienza a ejecutarse nuestro programa. Bytecode es un lenguaje de menor nivel pero va a permitir que se ejecute más rápido, mientras se va ejecutando hay un proceso que se llama el profiling data que va a estar analizando la ejecución, va a encontrar los puntos donde el programa se puede optimizar y eventualemente va a producir el machine code, esto hace el optimizing compiler el compilador de optimizaciones y despues tenemos el Optimized code.
+
+Hay veces en que estas asunciones fallan, ahí deoptimize(deoptimizamos) el código.
+## Analizador y Abstract Syntax Tree
+Parser: un parser va a tomar tu código fuente y lo va a leer, pero lo que tú estás escribiendo no es la que la computadora entiende así tal cual como lo escribiste. Primero lo tiene que descomponer y esa descomposición o esos pedazos que van a salir se llamán tokens. Tokens identifican que let es una palabra clave o new es una palabra clave, que el símbolo de + es un operador y que lo que está a un lado y al otro o quizás son número u otro tipo de variable; y una vez que tenemos esos tokens es cuando vamos a hacer el AST(Abstract Syntax Tree).
+## Fallo en el Parset
+Qué pasa si el parser está analizando tu programa y de momento hay algo que no hace sentido, justo es cuando ocurre un syntax error
+
+Un **SyntaxError** es lanzado cuando el motor de javascript se encuentra con parte de código que no forma parte de la sintaxis del lenguaje al momento de analizar código.
+
+El proceso de parsing es muy importante que se haga bien.
+
+Google dice:
+* Parsing es 15% - 20% del proceso de ejecución.
+* La mayoría del Javascript en una página nunca se ejecuta.
+* Esto hace que bundling y code splitting sea muy importante!
+
+La tercer parte significa que el código lo tenemos que empaquetar de una forma eficiente donde hay unos archivos de código separados lógicamente y que solamente vamos a cargar cuando sea necesario, esta es una modalidad que se está volviendo muy frecuentemente en aplicaciones de una sola página Single Pages Apps.
+## Eager Parsing (Parser de V8):
+Cuando sea hace este parsing vamos a encontrar todos los errores de sintaxis en el código que se está analizando y vamos a crear el AST. Que siemplemente es un árbol o arquitectura en forma de árbol que representa tu programa, y además va ha construir los scopes. En este momento vamos a saber qué variables se pueden leer en qué partes del código
+* Encuentrar errores de sintaxis
+* Crea el AST
+* Construye Scopes
+## Lazy Parsing
+Cuando hacemos esto (parsing) estamos retrazando alguna parte del código, porque no hace falta analizarla y puede esperar. Esto tiene una ventaja y es que es el doble de rápido, por lo tanto, si las cosas tardaban 20%, si logramos que ocurra mucho lazy parsing podemos retrazar ese análisis, una consecuencia es que el AST no se construye y los Scopes se construyen parcialmente.
+* Doble de rápido que el eager parser
+* No crea el AST
+* Construye los scopes parcialmente.
+## Tokens
+Accediendo al siguiente enlce podemos ver con ejemplos la manera en cómo una sentencia de javascript se transpila a un token. [url](https://esprima.org/demo/parse.html#) o ingresando a [esprima](https://esprima.org/)
+
+Parser produces the (beautiful) syntax tree
+
+```js
+// Life, Universe, and Everything
+var answer = "hola";
+```
+```js
+[
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "answer"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "String",
+        "value": "\"hola\""
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]
+```
+## Abstract Syntax Tree
+El AST es un gráfo (estructura en forma de árbol) donde vamos a tener una raíz que será nuestro programa y lo vamos a ir descomponiendo en partes, todo esto lo vamos a poder hacer siguiendo los tokens que produce el parser. Esto se usa en muchísimos sitios, no solo para ejecutar un programa javascript, también lo usamos para transformar código de una forma a otra, que es como lo que hace babel o priged
+
+Se usa en:
+
+* Javascript Engine
+* Bundlers: Webpack, Rollup, Parcel
+* Transpilers: Babel
+* Linters: ESLint, Prettify
+* Type Checkers: TypeScript, Flow
+* Syntax Highlighters
+
+Demo de AST
+```js
+let foo = "bar";
+```
+![grafo](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/demoast.jpg)
+
+También puede construir tu propio ejemplo en [AST Explorer](https://astexplorer.net/)
+
+# Abstract Syntax Tree en Práctica
+Usemos el AST para crear una regla para ESLint, que analiza estéticamente nuestro código para ver si encuentra errores, o si hay que leventar warnings porque estamos violando alguna regla de estilo, o simplemente nuestro código está violando la sintaxis del lenguaje. Muchas de estas reglas ya vienen con ESLint pero también podemos desarrollar nuevas, para hacer eso vamos a utilizar una herramienta que se llama AST Explorer. En este explorer tenemos que asegurarnos que la configuración es la correcta, si aquí no dice babel-eslint vamos a seleccionarla y vamos a ver cómo vamos a transformar el código. En este caso lo vamos a procesar y vamos usar la última versión de ESLint.
+
+En la parte de abajo del lado izquierdo vamos a escribir esa regla, y en la parte de abajo del lado derecho vamos a ver cómo esa regla está funcionando.
+
+La regla la vamos a definir dentro de una función y el nombre de esa función va a ser el nombre del nodo que queremos corregir. Si vamos al AST vemos que esta parte del código trabaja con declaraciones de variables. Cuando hay una declaración la queremos entender y si encontramos que el nombre está en lowerCase, que lo que hace es guardar un número, lo queremos corregir, así que vamos a corregir esto y copiaremos en este caso el nombre del nodo "VariableDeclaration", esta función es la que va a recibir un nodo.
+
+Código al que queremos establecer reglas:
+```js
+const pi = 3.1415;
+const halft_pi = 1.356;
+
+// Variables constantes
+// Variables que guarden un número 
+
+// El nombre de la variable tiene que estar en UPPER CASE
+```
+Reglas que establecemos para el código usando ESLint
+```js
+export default function(context) {
+  return {
+  	VariableDeclaration(node) {
+    	// Tipo de variable const
+      if(node.kind === "const") {
+      	const declaration = node.declarations[0];
+        // asegurarnos que el valor es un número  
+        if(typeof declaration.init.value === "number") {
+        	if(declaration.id.name !== declaration.id.name.toUpperCase()) {
+            	context.report({
+                	node: declaration.id,
+                  	message: "El nombre de la constante debe estar en Mayúsculas",
+                  	fix: function(fixer) {
+                    	return fixer.replaceText(declaration.id, declaration.id.name.toUpperCase());
+                    }
+                })
+            }
+        }
+      }
+    }
+  };
+};
+```
+# Como funciona el Javascript Engine
+Despues de que el parser hizo su trabajo y nos dio el AST continúa el interpretador, el compilador para obtener código optimizado.
+
+* Recibe código fuente
+* Parsea el código y produce un Abstract Syntax Tree(AST)
+* Se compila a bytecode
+* Se optimiza a machine code y se remplaza el código base.
+
+Cuando el bytecode se está ejecutando hay un observador, un programa que observa el bytecode y va a estar tomando notas, cuando tiene suficientes notas es capaz de tomar decisiones para optimizar tu código y así obtener código optimizado, si alguna de estas observaciones en el futuro resulta ser falsa y que todavía no se cumple, no pasa nada, tu código va a regresar a una versión ya optmizada donde va a seguir corriendo, aunque no tan rápido.
+## Bytecode vs Machine Code
+El bytecode es algo parecido a assembly y assembly es un lenguaje de muy bajo nivel pero que aún se puede escribir, son palabras clave que le dicen al procesador que hacer. Es similar a Assembly, excepto que en lugar de operar sobre un procesador va a operar sobre algo que se llama la virtual machine, que es un programa que ejecuta bytecode.
+
+El Machine Code es lo más bajo nivel, ni tú ni yo queremos escribir machine code a mano porque se trata básicamente de ceros y de unos, es código binario, pero los procesadores si lo necesitan así, es el código que les va a llegar a ellos y va a volar y es muy rápido porque el machine code no hay que traducirlo, ya está traducido.
+
+Cuando el motor de Javascript V8, que es el que ocupa chrome y node, produce este código va a crearlo a machine code. Ya el bytecode que corre la máquina virtual no se va a ocupar.
+
+El profiler es un programa que está en medio del bytecode y el optimizador, este programa lo que hace es que toma una observación de la ejecución del bytecode y, cuando ve que las funciones se están llamando igual una vez tras otra y todas la llamadas son iguales, puede hacer unas optimizaciones, ejemplo:
+
+```js
+function add(a, b) {
+  return a + b;
+}
+
+for (let i = 0; i < 1000; i++) {
+  add(i, i);
+}
+```
+Cuando el código se haya ejecutado (ejemplo, 50 veces), el código va a empezar a ponerse caliente, luego 100 iteraciones más y sera más caliente y así sucesivamente hasta que está súper caliente y está listo para ser optimizado. En términos del V8 le llamos hot function(función caliente). Esto significa que el optimizador de código ya está listo para optimizar esa parte, está seguro que la ejecución siempre es similar, recibe numeros, regresa numeros, entonces podemos optimizarla a machine code.
+
+Que pasa si, por la razón que sea, ya no estamos pasando 2 números como argumento, ahora estamos pasando 2 números y 1 cadena, el resultado sería el número 1 más el string todo pegado. Pero esto va a confundir al optimizador y lo regresará a bytecode, y lo que pasa es que se va a desoptimizar el código. Tú puedes seguir programando, no pasará nada, pero esto demuestra un poco de ineficiencia. Por esto es bueno que las funciones se llamen igual, si le pasamos objetos que tengan una forma diferente o argumentos de tipos diferentes, o no se va a poder optimizar tu función, o se va a desoptimizar, pero esto es así.
+
+Los motores de Javascript funcionan ligeramente diferente, cada browser tiene su propia implementación aunque todos siguen una estructura parecida, el que acabamos de analizar fue V8.
+
+## SpiderMonkey vs V8
+SpiderMonkey tiene 2 capas de optimización, Chakra también y recibe información de profiler y de varios lugares. JavascriptCore tiene 3 capas de optimización. ¿Esto significa que Safari es más rápido que Chrome? No necesariamente, en el desarrollo de programas o de ingeniería siempre se trata trades, intercambio de costo-beneficio. Esto quizás no sea perfecto, pero luego saldra mejor, y en javascriptCore puede ser que nuestro programa tarde un poquito más en comenzar, pero una vez que se inicialice, el profiler comienza a actuar, optimiza poco y luego otro poco, así sucesivamente.
+
+Mientras que en Chrome nuestro programa empieza a ejecutarse rápido y quizás toma un poco más de tiempo en que se optmize pero así es como funcionan los motores de javascript.
+## Event Loop
+Si lo tuviéramos que describir en una oración: El eventLoop es lo que hace que javascript parezca ser multihilo cuando realmente es un solo hilo. Entonces ¿cómo rayos es que podemos hacer scroll, click, cargar un imagen, hacer una petición, miles de cosas haciendo eso una sola vez?
+
+Tenemos que saber que Javascript se organiza usando 2 estructuras de datos, es el Stack y el Heap.
+![Stack memory](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackheap.png)
+El stack es una estructura de datos que lleva rastro de dónde está el programa, si un programa comienza con una función ``main()``, a su vez llama a ``renderList()`` y ``renderList()`` llama a ``getMovies()``, es Stack se vería algo así.
+
+También tenemos el memory heap, el memory heap es una estructura desorganizada, en el stack hay un orden, una función dentro de una función, una dentro de otra, el memory Heap es completamente aleatoria y ahí es donde se guarda la información de las variables, el scope, etc.
+
+El stack comenzará vacío, pero vamos a hacer una operación que se llama un push y vamos a poner como si ponemos un plato. Entonces en ese contenedor que solo está abierto para arriba hay un plato, si vovemos a hacer un push pusimos otro plato encima, hacemos push, otro plato encima; ahora, ¿qué pasa si tú quisieras quitar el plato que estaba hasta abajo? No puedes, porque no hay forma de sacarlo por enfrente, ni por debajo, solamente por arriba; por lo tanto tienes que sacar el plato que está hasta arriba, para sacar otro plato, otro y otro y por fin sacar el plato de hasta abajo.
+
+Esa operación de sacar se llama pop, si hacemos pop sale getMovies, si volvemos a hacer pop sale renderList, y si volvemos a hacer pop sale main y el obtenemos el stack vacío.
+
+![stack](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stack.png)
+El stack es donde están nuestras funciones, es el registro de cómo está operando nuestro programa, apunta a variables como el scope.
+![Stak part 2](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/scope.png)
+Es donde dice: Estas cosas en esta función tienen acceso al entorno global, esto tiene acceso al scope de la función, esto tiene acceso al scope de un bloque y nos guarda esa información.
+
+Entonces si tenemos un programa como este:
+![programa](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackstart.png)
+![programapart 2](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackmain.png)
+![programapart 3](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackhello.png)
+![programapart 4](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackconsole.png)
+Y así sucesivamente van agregando y quitando ejecuciones en el orden correspondiete.
+## EventLoop con Asincronía
+Cuando se ejecuta una función asíncrona, como por ejemplo un ``setTimeout()``, lo reconoce pero no lo ejecuta, sigue con su proceso normal y luego aparece otra vez para ejecutar la función que ejecutaría un ``setTimeout()``.
+
+Parece raro, pero esta es la asincronía, cosas que van a pasar eventualmente, pues eventualmente pasarán, pero aún no les toca.
+![programapart async 1](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncrono.png)
+![programapart async 2](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronosettimeout.png)
+![programapart async 3](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronoconsole.png)
+![programapart async 4](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronofin.png)
+![programapart async 5](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronoclean.png)
+![programapart async 6](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stacksettimeout.png)
+![programapart async 7](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronoclean.png)
+
 ```js
 
 ```
+```js
+
+```
+```js
+
+```
+
+
+
+
+
