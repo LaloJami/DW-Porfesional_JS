@@ -746,7 +746,7 @@ for (let i = 0; i < 1000; i++) {
   add(i, i);
 }
 ```
-Cuando el código se haya ejecutado (ejemplo, 50 veces), el código va a empezar a ponerse caliente, luego 100 iteraciones más y sera más caliente y así sucesivamente hasta que está súper caliente y está listo para ser optimizado. En términos del V8 le llamos hot function(función caliente). Esto significa que el optimizador de código ya está listo para optimizar esa parte, está seguro que la ejecución siempre es similar, recibe numeros, regresa numeros, entonces podemos optimizarla a machine code.
+Cuando el código se haya ejecutado (ejemplo, 50 veces), el código va a empezar a ponerse caliente, luego 100 iteraciones más y sera más caliente y así sucesivamente hasta que está súper caliente y está listo para ser optimizado. En términos del V8 le llamos **hot function** (función caliente). Esto significa que el optimizador de código ya está listo para optimizar esa parte, está seguro que la ejecución siempre es similar, recibe numeros, regresa numeros, entonces podemos optimizarla a **machine code**.
 
 Que pasa si, por la razón que sea, ya no estamos pasando 2 números como argumento, ahora estamos pasando 2 números y 1 cadena, el resultado sería el número 1 más el string todo pegado. Pero esto va a confundir al optimizador y lo regresará a bytecode, y lo que pasa es que se va a desoptimizar el código. Tú puedes seguir programando, no pasará nada, pero esto demuestra un poco de ineficiencia. Por esto es bueno que las funciones se llamen igual, si le pasamos objetos que tengan una forma diferente o argumentos de tipos diferentes, o no se va a poder optimizar tu función, o se va a desoptimizar, pero esto es así.
 
@@ -760,8 +760,8 @@ Mientras que en Chrome nuestro programa empieza a ejecutarse rápido y quizás t
 Si lo tuviéramos que describir en una oración: El eventLoop es lo que hace que javascript parezca ser multihilo cuando realmente es un solo hilo. Entonces ¿cómo rayos es que podemos hacer scroll, click, cargar un imagen, hacer una petición, miles de cosas haciendo eso una sola vez?
 
 Tenemos que saber que Javascript se organiza usando 2 estructuras de datos, es el Stack y el Heap.
-![Stack memory](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackheap.png)
 El stack es una estructura de datos que lleva rastro de dónde está el programa, si un programa comienza con una función ``main()``, a su vez llama a ``renderList()`` y ``renderList()`` llama a ``getMovies()``, es Stack se vería algo así.
+![Stack memory](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackheap.png)
 
 También tenemos el memory heap, el memory heap es una estructura desorganizada, en el stack hay un orden, una función dentro de una función, una dentro de otra, el memory Heap es completamente aleatoria y ahí es donde se guarda la información de las variables, el scope, etc.
 
@@ -791,9 +791,62 @@ Parece raro, pero esta es la asincronía, cosas que van a pasar eventualmente, p
 ![programapart async 5](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronoclean.png)
 ![programapart async 6](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stacksettimeout.png)
 ![programapart async 7](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/stackasyncronoclean.png)
+## Task Queue
+¿Cómo funciona esto?
+
+Para poder entenderlo tenemos que hablar sobre Queue: es una estructura de datos igual que el stack, donde lo primero que entra es lo último que sale. En el Queue lo primero que entra es lo primero que sale, es como ir al banco y hacemos una fila, el que llegó primero es al que van a atender primero
+
+Teniendo en cuenta esto vamos a hablar sobre la cola de tareas.
+
+Cuando teníamos el setTimeout() encolamos una tarea que ibamos a hacer en 1000 milisegundos.
+
+![el 0](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LlTyKe9xd6RJ6x5f2-z%2F-LoI7BKq8iGAhi-e5tzh%2F-LoI8ECasfDh5yGe9mqQ%2FScreenshot_24.png?alt=media&token=8ce5a515-85e6-4cbc-b17b-7dc4cb85705b)
+![el 0.5](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LlTyKe9xd6RJ6x5f2-z%2F-LoI7BKq8iGAhi-e5tzh%2F-LoI8HXWCsyohjVZW0h9%2FScreenshot_25.png?alt=media&token=014e4ffe-5596-4549-9d6f-e1436111da3d)
+![el 1](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloop.png)
+![el 2](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstack.png)
+¿Qué pasa si el stack no está vacío?
+![el 3](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstackloadtwo.png)
+![el 4](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstackloadtwotask.png)
+![el 5](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstackloadtwotaskall.png)
+![el 6](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstackiii.png)
+![el 7](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/eventloopstackfintwo.png)
+## Event Loop con Promesas
+Las promesas son algo que eventualmente va a pasar, se puede resolver una promesa o se puede rechazar pero lo importante es que eventualmente van a retornar algo, esto es asíncrono, entonces llevamos este programa de nombre moreAsync.
+
+![elp 1](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/promiseeventloop.png)
+Resulta que las promesas van en otra cola, la cola de microtareas Microtask Queue. Las microtareas son de mayor proridad y simpre van primero sobre el scheduled task.
+![elp 2](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtask.png)
+![elp 3](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtaskespera.png)
+![elp 4](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtaskpromise.png)
+![elp 5](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtaskpromise2.png)
+![elp 6](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtaskpromisefin.png)
+# Promesas
+
+Ya vimos cómo el eventLoop procesa las promesas, ahora vamos a volver a las promesas, pero esta vez vamos a ver cómo funciona el patrón de .then .Lo vamos a convertir a async await y también vamos a aprender diferentes patrones cuando escribimos funciones que nos regresan una promesa, todo esto para facilitar el desarrollo de nuestras apps. Todo esto lo vamos a hacer con una API que es libre, se llamá [themoviedb](https://www.themoviedb.org/?language=es-ES).
 
 ```js
+// The Movie Database API: https://developers.themoviedb.org/3/getting-started/introduction
+const apiKey = 'b89fc45c2067cbd33560270639722eae';
 
+function getMovie(id) {
+  const url = `https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}`;
+  return fetch(url).then(response => response.json());
+}
+
+async function getPopularMovies() {
+  const url = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${apiKey}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => data.results);
+}
+
+async function getTopMoviesIds(n = 3) {
+  return getPopularMovies().then(popularMovies => {
+    popularMovies.slice(0, n).map(movie => movie.id);
+  })
+}
 ```
 ```js
 
