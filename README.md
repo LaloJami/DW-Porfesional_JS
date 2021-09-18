@@ -956,11 +956,88 @@ p.green; // "Verder"
 p.reed //reee no se encontró. ¿Quisiste decir red?
 p.geen //geen no se encontró. ¿Quisiste decir green?
 ```
+# Generadores
+Los generadores sons funciones especiales, podemos iniciar su ejecución y detenerla a mitad, nuestro programa continúa por otro sitio y luego podemos regresar a esta función generador y continuar su ejecución donde la dejamos. Lo que está muy interesante es que los generadores, cuando los detenemos, se recuerdan de su contexto, de cuáles eran las variables que tenían en su scope. Veámos un ejemplo de cómo son las funciones.
 ```js
+function* simpleGenerator() {
+  console.log("GENERATOR START");
+  console.log("GENERATOR END");
+}
 
+const gen = simpleGenerator();
 ```
+Los generadores que se crean traen una función que se llama ``next()``, es una forma de decirle al generador "continúa tu ejecucíon", porque ahora esta suspendido. Si hacemos ``next()``, escribirá el generador en consola. Pero también regresa un objeto con los valores [value: undefine, y done: true], este es el valor de retorno del generador. Cuando ``done`` es ``true`` quiere decir que el generador terminó su ejecución.
 
+Para obtener value definido podemos utilizar un keyword que se llama yield y si ejecutamos ``next()`` el yield cortará la ejecución y ahi terminará la ejecución, y si queremos volver a ejecutar las instrucciones pendientes tenemos que volver a lanzar a ``next()``.
 
+```js
+function* simpleGenerator() {
+  console.log("GENERATOR START");
+  yield;
+  console.log("GENERATOR END");
+}
 
+const gen = simpleGenerator();
+gen.next()
+// GENERATOR START
+gen.next();
+// GENERATOR END
+```
+Algó muy interesantes es que cuando hacemos yield podemos regresar un valor
+```js
+function* simpleGenerator() {
+  console.log("GENERATOR START");
+  yield 1; // {value: 1, done: false}
+  yield 2; // {value: 2, done: false}
+  yield 3; // {value: 3, done: false}
+  console.log("GENERATOR END");
+}
+
+const gen = simpleGenerator();
+gen.next()
+// GENERATOR START
+gen.next();
+// GENERATOR END
+```
+Generadores inifitos
+```js
+// Podemos hacer generadores infinitos
+function* idMaker() {
+  let id = 1;
+  while (true) {
+    yield id;
+    id += 1;
+  }
+}
+```
+Cuando llamamos a next() también podemos pasar valores que la función recibe.
+```js
+function* idMakerWithReset() {
+  let id = 1;
+  let reset;
+  while (true) {
+    reset = yield id;
+    if (reset) {
+      id = 1;
+    } else {
+      id += 1;
+    }
+  }
+}
+```
+Los generadores se prestan para crear funciones eficientes en memoria. Vamos a escribir la secuencia fibonacci, una función que imprima la secuencia, que lo que hace es sumar los dos números anteriores para generar uno nuevo.
+```js
+// Ahora hagamos un ejemplo un poco más complejo: la secuencia fibonacci
+function* fibonacci() {
+  let a = 1, b = 1;
+  while (true) {
+    const nextNumber = a + b;
+    a = b;
+    b = nextNumber;
+    yield nextNumber;
+  }
+}
+```
+Los generadores son funciones especiales cuya ejecución podemos comenzar y detener a mitad de vuelo, y cuando queramos continuarla podemos llamar a next(). Podemos pasarle un valor al generador si hace falta y su ejecución va a continuar siempre recordándose del scope en el que estaba.
 
 
