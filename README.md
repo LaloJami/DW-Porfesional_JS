@@ -822,7 +822,7 @@ Resulta que las promesas van en otra cola, la cola de microtareas Microtask Queu
 ![elp 6](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/microtaskpromisefin.png)
 # Promesas
 
-Ya vimos cómo el eventLoop procesa las promesas, ahora vamos a volver a las promesas, pero esta vez vamos a ver cómo funciona el patrón de .then .Lo vamos a convertir a async await y también vamos a aprender diferentes patrones cuando escribimos funciones que nos regresan una promesa, todo esto para facilitar el desarrollo de nuestras apps. Todo esto lo vamos a hacer con una API que es libre, se llamá [themoviedb](https://www.themoviedb.org/?language=es-ES).
+Ya vimos cómo el eventLoop procesa las promesas, ahora vamos a volver a las promesas, pero esta vez vamos a ver cómo funciona el patrón de .then .Lo vamos a convertir a async await y también vamos a aprender diferentes patrones cuando escribimos funciones que nos regresan una promesa, todo esto para facilitar el desarrollo de nuestras apps. Todo esto lo vamos a hacer con una API que es libre, se llamá [themoviedb](https://developers.themoviedb.org/3/getting-started/authentication).
 
 ```js
 // The Movie Database API: https://developers.themoviedb.org/3/getting-started/introduction
@@ -848,8 +848,113 @@ async function getTopMoviesIds(n = 3) {
   })
 }
 ```
-```js
+# Getters y Setters
+Uno de los features modernos que trae javascript son getters y setters, son funciones que podemos utilizar dentro de objetos que nos permiten tener propiedades virtuales, es decir, no es una propiedad que existe directamente en el objeto, pero a través de un getter o setter podemos correr una fución que va a calcular estos valores o va a mostrar una valor para establecer este nuevo valor.
 
+Los getters los vamos a escribir usando el keyword get seguido de la propiedad virtual
+```js
+let person = {
+  name:'Lalo',
+  last_name:'Jami',
+  age:25,
+  languages:['js','css','python'],
+  get skills(){
+    return this.languages
+  }
+}
+
+console.log(person.skills)
+```
+En este caso estoy retornando el valor de languages atraves de un getter llamado skills, pero para ver mejor su uso, mira este ejemplo:
+```js
+let person = {
+  name:'Lalo',
+  last_name:'Jami',
+  age:25,
+  languages:['js','css','python'],
+  get fullName(){
+    return `${this.name} ${this.last_name}`
+  }
+}
+
+console.log(person.fullName)
+```
+En este caso estoy retornando el nombre completo (fullName), como una propiedad del objeto person. El fullName también lo podría traer a través de un método de la siguiente forma:
+```js
+let person = {
+  name:'Lalo',
+  last_name:'Jami',
+  age:25,
+  languages:['js','css','python'],
+  fullName: function(){
+    return `${this.name} ${this.last_name}`
+  }
+}
+
+console.log(person.fullName())
+```
+Sin embargo, a traves del getter la semantica es mucho màs transparente y mantiene mejor la integridad de la data.
+
+Setter
+```js
+let person = {
+  name:'Lalo',
+  last_name:'Jami',
+  age:25,
+  languages:[],
+  set skills(){
+    this.languages = skills
+  }
+}
+
+person.skills = ['js','css','python']
+console.log(person.languages)
+```
+En resumen los getters y setters nos permiten tener el control sobre las propiedades que podemos almacenar o recuperar.
+# Proxy
+Igual que los getters y setters, el proxy es uno de los features más recientes del lenguaje. También igual que los getters y setters, podemos intersectar algunas llamadas a un objeto. Sin embargo, más alla de get y set, podemos intersectar muchísimas otras cosas. Si vamos a la documentación de Proxy en MDN vamos a encontrar una sección que dice Methods of the handler object (métodos del objeto manejador). Aquí vamos a encontrar a get y set, decimos que son trampas. Cuando hay una llamada, la llamada va a caer en estas trampas si las tenemos definidas. En la trampa de get y de set también hay trampas para ver el getPrototypeOf, handler.apply, handler.constructor, etc.
+
+Esto nos va a permitir que antes de que la llamada llegue al objeto al que tiene que llegar podemos manipularla. Hay una idea que se me hace muy interesante y muy divertida, es un feature que tienen algunos programas como por ejemplo git. Si vamos a la consola y escribimos mal el comando, no se ejecutara la instrucción, pero nos devolverá una sugerencia a lo que escribimos, o en dado caso de no tener una sugerencia, nos dará una lista de posibles comandos.
+
+Vamos a hacer esto mismo, pero en Javascript, que será interceptar las llamadas si la propiedad que está buscando el usuario no existe en un objeto. Vamos a ver cuáles son las que sí existen para sugerir una.
+
+Para este ejemplo nos vamos a apoyar de una librería que se llama [fast-levenshtein](https://www.jsdelivr.com/package/npm/fast-levenshtein). Leveshtein es un algoritmo que va a encontrar la distancia entre 2 cadenas. Es decir, si tenemos 2 cadenas y se diferencian por 1 sola letra la distancia sería de 1; si se diferencian por 2 campos, sería una distancia de 2.
+```js
+// target es mi objeto a supervisar (sus propiedades pueden ser objetos, array, funciones, u otro proxy)
+const target = {
+  red: 'Rojo',
+  green: 'Verde',
+  blue: 'Azul'
+}
+// handler es un objeto con funciones (trampa) que definen las acciones a seguir cuando se accede al objeto supervisado
+const handler = {
+  get(obj, prop) {
+    if (prop in obj) {
+      // si la propiedad existe, pues retornamos su valor
+      return obj[prop]
+    }
+
+    // Si llega hasta aqui, vamos a ver si podemos retornar una sugerencia
+    const suggetion = Object.keys(obj).find(key => {
+      // creo un objeto con todas mis claves del objeto supervisado, y retorno aquella (nombre) 
+      // que su distancia sea <= 3 tomando como base la propiedad invocada
+      return Levenshtein.get(key, prop) <= 3 
+    })
+
+    
+    if (suggetion) {
+      console.log(`${prop} no se encontró. ¿Quisiste decir ${suggetion}?`);
+    }
+
+    return obj[prop];
+  }
+}
+const p = new Proxy(target, handler);
+
+p.red; // "Rojo"
+p.green; // "Verder"
+p.reed //reee no se encontró. ¿Quisiste decir red?
+p.geen //geen no se encontró. ¿Quisiste decir green?
 ```
 ```js
 
