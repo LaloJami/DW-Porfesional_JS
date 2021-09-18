@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Scope</title>
+    </head>
+  
+    <body>
+      <a href="/ejercicios/">Go back</a>
+      <p><em>Abre la consola</em></p>
+  
+      <script>
+          function Hero(name) {
+              this.name = name;
+          }
+          Hero.prototype.saludar = function() {
+              console.log(`Hola soy ${this.name}.`);
+          };
+
+          const zelda = new Hero('Zelda');
+        // Propiedades de la instancia
+        console.log('Name:', zelda.name)
+        // propuedades de la "clase"
+        console.log('Saludar:', zelda.saludar)
+        // propiedades heredaddas ej: toString
+        console.log('toString:', zelda.toString)
+        // hasOwnProperty (de donde sale toString o esto?)
+        console.log(
+            'zelda.hasOwnProperty("saludar"):', 
+            zelda.hasOwnProperty("saludar")
+        )
+
+        // inspeccionemos el prototipo del zelda
+        // inspeccionemos el prototipo del Hero
+        // inspeccionemos el prototipo del Object
+      </script>
+    </body>
+  </html>

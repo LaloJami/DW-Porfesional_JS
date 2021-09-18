@@ -554,3 +554,48 @@ console.log('toString: ', zelda.toString);
 console.log('zelda.hasOwnProperty("name"): ', zelda.hasOwnProperty('name'));
 console.log('zelda.hasOwnProperty("saludar"): ', zelda.hasOwnProperty('saludar'));
 ```
+Proto proto es el lugar donde cayeron todas las propiedades que estaban en Hero.prototype, si seguimos por ahí, hay otro proto que viene desde Object y aquí está hasOwnProperty y toString.
+
+Nosotros podemos escribrir ``zelda._proto_`` y va funcionar, pero esa propiedad proto es algo que puede variar, no es algo que está especificado en el lenguaje. Es un detalle de implementación que ponen los browsers o node o cualquier otro entorno. La forma correcta o sugerida es utilizando ``Object.getPrototypeOf(zelda)``, el cual nos va a regresar ese prototipo.
+
+si comparamos:
+```js
+const prototypeOfZelda = Object.getPrototypeOf(zelda);
+prototypeOfZelda === Hero.prototype;
+// true
+```
+Este objeto es idéntico al que está a prototypeOfZelda, no solo porque tiene el mismo contenido sino porque es el mismo objeto. Cuando utilizamos ``===`` es porque estamos comparando la referencia en memoria es decir: el mismo lugar en memoria. Si esto es cierto nosotros podemos hacer lo siguiente:
+```js
+const prototypeOfZelda = Object.getPrototypeOf(zelda);
+prototypeOfZelda === Hero.prototype;
+// true
+Hero.prototype.fight = function () {console.log("FIGHT")}
+zelda.fight();
+// Ejecuta el menssage
+```
+Es una referencia desde zelda hasta prototype, el lenguaje lo está encadenando, porque si vamos a zelda.hasOwnProperty("fight"); es false porque no le pertenece, le pertence al prototype.
+
+Lo que hace el lenguaje para encontrarlo es preguntar: -- ¿zelda.fight existe? -- No existe -- Okay, vamos a buscarlo en su proto -- ¿zelda.proto.fight existe? -- Sí -- Ejecutamos!!
+
+Object es el punto de partida de todos los objetos en javascript, esto incluye las funciones que también son objetos en javascript
+# ¿Cómo funciona Javascript?
+¿Qué pasa cuando llega un script al navegador?
+
+Comienza un proceso ejecutado por el motor de javascript que va a tomar ese código y lo va analizar y lo va a deconstruir y reconstruir, despues ejecuta y luego lo optimiza.
+
+Acerca de la web...
+
+La web no siempre ha sido igual y cuando llegó javascript llegó con Netscape. En ese entonces lo que hacíaamos eran cosas muy simples donde abriamos un cajon donde el usuario ingresaba información y luego el programa lo leía y lo seguíaa ejecutando, pero eran cosas muy simples, en javascript lo que hacíamos es que íbamos leyendo línea por línea y lo íbamos interpretando un paso a la vez, y eso sigue siendo cierto pero de una manera totalmente nueva, y esta nueva manera llegó con Google Chrome.
+
+Google, una compañía con productos sumamente complejos como Google Maps, necesitaba un navegador que pudiera ejecutar las cosas más eficientemente y por eso reinventó cómo funcionaban los Motores de Javascript. En resumen, esto es lo que hacen:
+* Reciben un código fuente, lo analizan y lo deconstruyen en el AST(Abstract Syntax Tree). Este AST lo toma un interpretador y lo convierte en bytecode, que es lo que se va a ejecutar, el programa va a empezar ejecutando bytecode y eventualmente va a tener suficiente información para ejecutar machine code que es el mismo código pero automizado.
+
+1. Recibe código fuente,
+2. Parsea código y produce Abstract Syntax Tree(AST)
+3. Se compila a bytecode y se ejecuta.
+4. Se optimiza a machine code y se remplaza el código base.
+Mirando un grafo con este orden usando V8.
+![grafo](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LlTyKe9xd6RJ6x5f2-z%2F-LoBMLhD1_J2PtZzvrDo%2F-LoBMsLB7cpFBtb-EZ9L%2FScreenshot_11.png?alt=media&token=bc179ac3-ae0f-4c89-b10c-b1fae0986f80)
+```js
+
+```
