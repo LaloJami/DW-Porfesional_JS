@@ -1121,3 +1121,75 @@ stopButton.onclick = function() {
 };
 ```
 
+
+Un sitio tiene un carrusel de imágenes que no debería avanzar a la siguiente diapositiva a no ser que el usuario esté viendo la página.
+ 
+Una aplicación que muestra un panel de información y no se quiere que se actualice la información del servidor cuando la página no está visible.
+ 
+Una página quiere detectar cuando se está precargando para poder mantener un recuento preciso de las vistas de página.
+ 
+Un sitio desea desactivar los sonidos cuando el dispositivo está en modo de espera (el usuario presiona el botón de encendido para apagar la pantalla).
+
+# Intersection Observer API
+La API Observador de Intersección provee una vía para, de forma asíncrona, observar cambios en la intersección de un elemento con un elemento ancestro o con el viewport del documento de nivel superior.
+
+La información sobre intersección es necesaria por muchas razones, tales como:
+
+Lazy-loading de imágenes u otro contenido a medida que la página se desplaza. Implementación de “scroll infinito” de sitios web, donde más y más contenido se carga y muestra a medida que usted hace scroll, de forma que el usuario no tiene que pasar páginas. Informes de visualizaciones de anuncios para calcular ingresos por publicidad. Decidir si deben realizarse tareas o procesos de animación basados en si el usuario verá o no el resultado.
+
+## Creando un Intersection Observer
+Crear el Intersection Observer llamando a su constructor y pasándole una función callback() para que se ejecute cuando un nivel (threshold) sea cruzado en una u otra dirección:
+```js
+var options = {
+  root: document.querySelector('#scrollArea'),
+  rootMargin: '0px',
+  threshold: 1.0
+}
+
+var observer = new IntersectionObserver(callback, options);
+```
+Un threshold de 1.0 significa que cuando el 100% del elemento target está visible dentro del elemento especificado por la opción root, la función callback es invocada.
+
+## Opciones de Intersection observer
+El objeto options pasado al constructor [IntersectionObserver()](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver) le deja controlar las circunstancias bajo las cuales la función callback del observer es invocada. Tiene los siguientes campos:
+
+root
+
+El elemento que es usado como viewport para comprobar la visibilidad de elemento target debe ser un elemento ascendiente del target. Por defecto se toma el viewport del navegador si no se especifica o si se especifica como null.
+
+rootMargin
+
+Margen alrededor del elemeto root. Puede tener valores similares a los de CSS [margin](https://developer.mozilla.org/en-US/docs/Web/CSS/margin) property, e.g. "10px 20px 30px 40px" (top, right, bottom, left). Los valores pueden ser porcentajes. Este conjunto de valores sirve para aumentar o encoger cada lado del cuadro delimitador del elemento root antes de calcular las intersecciones. Por defecto son todos cero.
+
+threshold
+
+Es un número o un array de números que indican a que porcentaje de visibilidad del elemento target, la función callback del observer debería ser ejecutada. Si usted quiere que se detecte cuando la visibilidad pasa la marca del 50%, debería usar un valor de 0.5. Si quiere ejecutar la función callback cada vez que la visibilidad pase otro 25%, usted debería especificar el array [0, 0.25, 0.5, 0.75, 1]. El valor por defecto es 0 (lo que significa que tan pronto como un píxel sea visible, la función callback será ejecutada). Un valor de 1.0 significa que el umbral no se considera pasado hasta que todos los pixels son visibles.
+
+## Determinando un elemento para ser observado
+
+Una vez usted ha creado el observer, necesita darle un elemento target para observar:
+
+```js
+var target = document.querySelector('#listItem');
+observer.observe(target);
+```
+Cuando el elemento target encuentra un threshold especificado por el IntersectionObserver, la función callback es invocada. La función callback recibe una lista de objetos [IntersectionObserverEntry](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) y el observer:
+```js
+var callback = function(entries, observer) { 
+  entries.forEach(entry => {
+    // Cada entry describe un cambio en la intersección para
+    // un elemento observado
+    //   entry.boundingClientRect
+    //   entry.intersectionRatio
+    //   entry.intersectionRect
+    //   entry.isIntersecting
+    //   entry.rootBounds
+    //   entry.target
+    //   entry.time
+  });
+};
+```
+
+Asegúrese de que su función callback se ejecute sobre el hilo principal. Debería operar tan rápidamente como sea posible; si alguna cosa necesita tiempo extra para ser realizada, use [Window.requestIdleCallback()](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback).
+
+También, note que si especifica la opción root, el elemento target debe ser un descendiente del elemento root.
