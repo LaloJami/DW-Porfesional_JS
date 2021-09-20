@@ -1,4 +1,6 @@
 # Ignora la carpeta node_modules
 node_modules/
+.cache
+dist
 # Ignora los videos
 *.mp4
