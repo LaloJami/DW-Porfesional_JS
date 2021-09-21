@@ -1822,3 +1822,380 @@ Las situaciones más habituales de aplicación de este patrón son aquellas en l
 El patrón singleton provee una única instancia global gracias a que:
 
 La propia clase es responsable de crear la única instancia. Permite el acceso global a dicha instancia mediante un método de clase. Declara el constructor de clase como privado para que no sea instanciable directamente. Al estar internamente autoreferenciada, en lenguajes como Java, el recolector de basura no actúa.
+
+# Implementación del patrón Singleton con Typescript
+Uno de los patrones de diseño de creación más populares es el patrón Singleton que restringe la creación de instancias de una clase a un objeto.
+
+En esta publicación, le mostraré cómo usar el patrón junto con TypeScript.
+## Es genial con Typescript
+La biblia de los patrones de diseño, a saber, el libro de Gang of Four (GoF), presenta la aplicación de patrones utilizando el lenguaje C ++, un lenguaje estáticamente tipado.
+
+TypeScript permite implementar el patrón Singleton gracias a las siguientes características:
+
+* soporte para modificadores de acceso (privado, protegido, público),
+* soporte para métodos estáticos,
+* siendo un lenguaje estáticamente escrito.
+```ts
+class Singleton {
+  private static instance: Singleton;
+  private constructor() {
+    // initialition
+  }
+
+  static getInstance() {
+    if (!Singleton.instance) {
+      Singleton.instance = new Singleton();
+    }
+
+    return Singleton.instance;
+  }
+}
+
+export default Singleton;
+```
+Luego podemos crear instancias de Singleton que harán referencia al mismo objeto en memoria.
+```ts
+import Singleton from './Singleton';
+
+const a = Singleton.getInstance();
+const b = Singleton.getInstance();
+
+console.log("¿A es igual a B?", a === b);
+```
+# Observer (patrón de diseño)
+
+Observador (en inglés: [Observer](https://en.wikipedia.org/wiki/Observer_pattern)) es un [patrón de diseño](https://es.wikipedia.org/wiki/Patr%C3%B3n_de_dise%C3%B1o) de software que define una dependencia del tipo uno a muchos entre objetos, de manera que cuando uno de los objetos cambia su estado, notifica este cambio a todos los dependientes. Se trata de un patrón de comportamiento (existen de tres tipos: creación, estructurales y de comportamiento), por lo que está relacionado con algoritmos de funcionamiento y asignación de responsabilidades a [clases](https://es.wikipedia.org/wiki/Clase_(inform%C3%A1tica)) y [objetos](https://es.wikipedia.org/wiki/Objeto_(programaci%C3%B3n)).
+
+Los patrones de comportamiento describen no solamente estructuras de relación entre objetos o clases sino también esquemas de comunicación entre ellos y se pueden clasificar en función de que trabajen con clases (método plantilla) u objetos (cadena de responsabilidad, comando, iterador, recuerdo, observador, estado, estrategia, visitante).
+
+La variación de la encapsulación es la base de muchos patrones de comportamiento, por lo que cuando un aspecto de un programa cambia frecuentemente, estos patrones definen un objeto que encapsula dicho aspecto. Los patrones definen una clase abstracta que describe la encapsulación del objeto.
+
+Este patrón también se conoce como el patrón de publicación-inscripción o modelo-patrón. Estos nombres sugieren las ideas básicas del patrón, que son: el objeto de datos, que se le puede llamar Sujeto a partir de ahora, contiene atributos mediante los cuales cualquier objeto observador o vista se puede suscribir a él pasándole una referencia a sí mismo. El Sujeto mantiene así una lista de las referencias a sus observadores. Los observadores a su vez están obligados a implementar unos métodos determinados mediante los cuales el Sujeto es capaz de notificar a sus observadores suscritos los cambios que sufre para que todos ellos tengan la oportunidad de refrescar el contenido representado. De manera que cuando se produce un cambio en el Sujeto, ejecutado, por ejemplo, por alguno de los observadores, el objeto de datos puede recorrer la lista de observadores avisando a cada uno. Este patrón suele utilizarse en los [entornos de trabajo](https://es.wikipedia.org/wiki/Framework) de interfaces gráficas orientados a objetos, en los que la forma de capturar los eventos es suscribir listeners a los objetos que pueden disparar eventos.
+## Objetivo
+Definir una dependencia uno a muchos entre objetos, de tal forma que cuando el objeto cambie de estado, todos sus objetos dependientes sean notificados automáticamente. Se trata de desacoplar la clase de los objetos clientes del objeto, aumentando la modularidad del lenguaje, creando las mínimas dependencias y evitando bucles de actualización (espera activa o sondeo). En definitiva, normalmente, se usará el patrón observador cuando un elemento quiere estar pendiente de otro, sin tener que estar comprobando de forma continua si ha cambiado o no.
+## Motivación
+Si se necesita consistencia entre clases relacionadas, pero con independencia, es decir, con un bajo [acoplamiento](https://es.wikipedia.org/wiki/Acoplamiento_(inform%C3%A1tica)).
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/observer.png)
+
+El patrón observador es la clave del patrón de arquitectura Modelo Vista Controlador (MVC).1​ De hecho el patrón fue implementado por primera vez en el MVC de Smalltalk basado en un entorno de trabajo de interfaz.2​ Este patrón está implementado en numerosos bibliotecas y sistemas, incluyendo todos los toolkits de GUI.
+Patrones relacionados: publicador-subscriptor, mediador, singleton.
+
+## Participantes
+Habrá sujetos concretos cuyos cambios pueden resultar interesantes a otros y observadores a los que al menos les interesa estar pendientes de un elemento y en un momento dado, reaccionar ante sus notificaciones de cambio. Todos los sujetos tienen en común que un conjunto de objetos quieren estar pendientes de ellos. Cualquier elemento que quiera ser observado tiene que permitir indicar:
+
+1. "Estoy interesado en tus cambios".
+2. "Ya no estoy interesado en tus cambios".
+
+El observable tiene que tener, además, un mecanismo de aviso a los interesados. A continuación se detallan a los participantes de forma desglosada:
+
+Sujeto (subject): El sujeto proporciona una interfaz para agregar (attach) y eliminar (detach) observadores. El Sujeto conoce a todos sus observadores.
+
+Observador (observer): Define el método que usa el sujeto para notificar cambios en su estado (update/notify). Sujeto concreto (concrete subject): Mantiene el estado de interés para los observadores concretos y los notifica cuando cambia su estado. No tienen porque ser elementos de la misma jerarquía.
+
+Observador concreto (concrete observer): Mantiene una referencia al sujeto concreto e implementa la interfaz de actualización, es decir, guardan la referencia del objeto que observan, así en caso de ser notificados de algún cambio, pueden preguntar sobre este cambio.
+
+Es uno de los patrones más utilizados, algunos ejemplos típicos son
+
+* Newsletter
+* Sockets
+* Listeners en páginas web
+# Implicaciones sobre Observer
+### Problema 1:
+Para evitar que el observador concreto tenga una asociación con el sujeto concreto, se podría hacer que la relación entre sujeto y observador fuese bidireccional, evitando así asociaciones concretas, el problema es que dejaría de ser una interfaz. El que deje de ser una interfaz puede producir problemas si el lenguaje de programación no soporta la [herencia múltiple](https://es.wikipedia.org/wiki/Herencia_m%C3%BAltiple).
+
+Se podría eliminar la bidireccionalidad de la asociación pasando el sujeto como parámetro al método actualizar y ya no se tendría que referenciar el objeto observado. Esto podría causar problemas si se observan varios objetos, tanto de la misma clase como de distintas, ya que no elimina dependencias, y para hacer operaciones específicas sobre el objeto actualizado obliga a hacer en la implementación.
+
+### Problema 2: 
+Si hay muchos sujetos sin observador, la estructura de los observadores está desaprovechada, para solucionarlo se puede tener un intermediario que centralice el almacenamiento de la asociación de cada sujeto con sus observadores. Para esta solución se crea ese gestor de observadores usando el patrón [singleton](https://es.wikipedia.org/wiki/Singleton) (instancia única), ya que proporciona una única referencia y no una por cada sujeto. El gestor aunque mejora el aprovechamiento del espacio, hace que se reduzca el rendimiento y se pierde eficiencia en el método notificar.
+
+### Problema 3: 
+El responsable de iniciar la comunicación es el sujeto concreto, pero se puede dar un problema cuando el objeto concreto está siendo actualizado de forma continua ya que debido a esto se tendría que realizar muchas actualizaciones en muy poco tiempo. La solución sería suspender temporalmente las llamadas al método de actualización/notificación; por ejemplo, haciendo que el cliente pueda activar o desactivar las notificaciones y notificar todos los cambios cuando las vuelva a habilitar. El patrón Estado sería una posible solución para diseñar esta variante de no notificar si no se han dado cambios o hacerlo en caso de que si.
+
+### Problema 4 
+(referencias inválidas): A la hora de implementar este patrón se debe tener cuidado cuando un elemento observable desaparece. En ciertos lenguajes será el gestor de memoria el que cada cierto tiempo debe de limpiar las referencias liberadas, pero si un observable que sigue siendo observado puede no liberarse nunca. Para solucionar este problema puede crearse una función destruir que notifique al gestor que el elemento observable va a desaparecer y si no se está usando la variante del gestor el observable directamente desregistrará a sus observadores. Antes de esto hay que eliminar las referencias a este elemento, por tanto, hay que eliminar a los observadores antes de eliminar al observable, ya que así se evitará tanto que aparezcan referencias inválidas al objeto una vez este haya sido eliminado, como que se produzcan operaciones inválidas intentando invocarlo.
+
+Se puede avisar a los observadores creando un método actualizar especial, en el que se tendrían dos opciones:
+
+1. El observador también muere.
+2. El observador sigue vivo, pero apunta a nulo.
+### Problema 5: 
+Ya que se debe asegurar la consistencia del estado del sujeto antes de iniciar una notificación, siempre se notificará al final, ya que aunque en entorno multihilo se notifica antes de hacer los cambios, puede que los observadores soliciten información al observable cuando aún se van a hacer más cambios y se darían problemas de consistencia si se accede a un estado que aún no es el definitivo. De esta forma, los observadores ya no accederán a sujetos en estado inconsistente.
+
+Por ejemplo:
+
+Secuencia incorrecta: a b c notificar() d e f Secuencia correcta: a b c d e f notificar()
+
+Jerarquía con varios tipos des observadores: en este caso el hilo redefine cambios, no los notifica.
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/JerarquiasObservador.png)
+
+Jerarquía de varios observadores
+
+### Problema 6 
+En mecanismos de notificación tradicionalmente hay dos opciones: pull que es la que propone el patrón observador; y push que es la que se tendría si se incluye información como parámetros en el mecanismo de actualización. El problema de hacer esto es que la interfaz del observador se vuelve más específica y por tanto menos genérica y reutilizable.
+
+PULL: los objetos avisan de que han cambiado y el observador pregunta cuál ha sido el cambio.
+
+PUSH: minimiza (eficiencia) que cuando algo cambia y se informará a todos los interesados, se realicen el menor número de llamadas posibles.
+
+Dependiendo del problema que haya que resolver, se habrá de valorar que implementación se ajusta mejor para resolverlo de la forma más eficiente y efectiva o si las variantes anteriores pueden combinarse entre sí dependiendo de las características de escenario concreto. Por ejemplo, la opción 2 podría aplicarse cuando interese aplicar en un sujeto concreto n métodos seguidos y no se quiere notificar hasta que todos finalicen su ejecución.
+
+# Implementación del patrón Observer con Typescript
+`Docuento HTML:`
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Observer</title>
+</head>
+<body>
+  <h1>Precio del Bitcoin</h1>
+  <p><em id="price">$0.00</em></p>
+
+  <input type="text" id="value">
+
+  <script src="index.ts"></script>
+</body>
+</html>
+```
+`Lógica de Typescript`
+```ts
+// Definiendo algunas interfaces
+
+interface Observer {
+  updated: (data: any) => void;
+
+}
+
+interface Subject {
+  subscribe: (observer: Observer) => void;
+  unsubscribe: (observer: Observer) => void;
+}
+
+class BitcoinPrice implements Subject {
+  observers: Observer[] = [];
+
+  constructor() {
+    const el: HTMLInputElement = document.querySelector("#value");
+    el.addEventListener('input', () => {
+      this.notify(el.value);
+    })
+  }
+
+  subscribe(observer: Observer) {
+    this.observers.push(observer)
+  }
+
+  unsubscribe(observer: Observer) {
+    const index = this.observers.findIndex(obs => {
+      return obs === observer;
+    })
+
+    this.observers.splice(index, 1);
+  }
+
+  notify(data: any) {
+    this.observers.forEach(observer => observer.updated(data))
+  }
+}
+
+class PriceDisplay implements Observer {
+  private el: HTMLElement;
+
+  constructor() {
+    this.el = document.querySelector("#price");
+  }
+  updated(data: any) { 
+    this.el.innerText = data;
+  }
+}
+
+const value = new BitcoinPrice();
+const display = new PriceDisplay();
+
+// Subscribimos el Display al Value
+value.subscribe(display);
+
+// Simulamos unsubscribe usando un setTimeout de 5 segundos
+setTimeout(
+  () => value.unsubscribe(display),
+  5000
+)
+```
+# Casos de uso del patrón Observer: Redux
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/redux.png)
+Te ayuda a escribir aplicaciones que se comportan de manera consistente, corren en distintos ambientes (cliente, servidor y nativo), y son fáciles de probar. Además de eso, provee una gran experiencia de desarrollo, [gracias a edición en vivo combinado con un depurador sobre una línea de tiempo](https://github.com/reduxjs/redux-devtools).
+
+Puedes usar Redux combinado con React, o cual cualquier otra librería de vistas. Es muy pequeño (2kB) y no tiene dependencias.
+
+## Conceptos básicos
+Redux de por si es muy simple.
+
+Imagine que el estado de su aplicación se describe como un simble objeto. Por ejemplo, el estado de una aplicación de tareas (TODO List) puede tener el siguiente aspecto:
+```js
+{
+  todos: [{
+    text: 'Comer',
+    completed: true
+  }, {
+    text: 'Hacer ejercicio',
+    completed: false
+  }],
+  visibilityFilter: 'SHOW_COMPLETED'
+}
+```
+Este objeto es como un “modelo” excepto que no hay setters. Esto es así para que diferentes partes del código no puedan cambiar el estado arbitrariamente, causando errores difíciles de reproducir.
+
+Para cambiar algo en el estado, es necesario enviar una acción. Una acción es un simple objeto en JavaScript (observe cómo no introducimos ninguna magia) que describe lo que sucedió. A continuación mostramos algunos ejemplos de acciones:
+```js
+{ type: 'ADD_TODO', text: 'Ir a nadar a la piscina' }
+{ type: 'TOGGLE_TODO', index: 1 }
+{ type: 'SET_VISIBILITY_FILTER', filter: 'SHOW_ALL' }
+```
+Hacer valer que cada cambio sea descrito como una acción nos permite tener una claro entendimiento de lo que está pasando en la aplicación. Si algo cambió, sabemos por qué cambió. Las acciones son como migas de pan (el rastro) de lo que ha sucedido. Finalmente, para juntar el estado y las acciones entre si, escribimos una función llamada reductor (reducer). Una vez más, nada de magia sobre él asunto, es sólo una función que toma el estado y la acción como argumentos y devuelve el siguiente estado de la aplicación. Sería difícil escribir tal función para una aplicación grande, por lo que escribimos funciones más pequeñas que gestionan partes del estado:
+```js
+function visibilityFilter(state = 'SHOW_ALL', action) {
+  if (action.type === 'SET_VISIBILITY_FILTER') {
+    return action.filter;
+  } else {
+    return state;
+  }
+}
+
+function todos(state = [], action) {
+  switch (action.type) {
+  case 'ADD_TODO':
+    return state.concat([{ text: action.text, completed: false }]);
+  case 'TOGGLE_TODO':
+    return state.map((todo, index) =>
+      action.index === index ?
+        { text: todo.text, completed: !todo.completed } :
+        todo
+   )
+  default:
+    return state;
+  }
+}
+```
+Y escribimos otro reductor que gestiona el estado completo de nuestra aplicación llamando a esos dos reductores por sus respectivas state keys:
+```js
+function todoApp(state = {}, action) {
+  return {
+    todos: todos(state.todos, action),
+    visibilityFilter: visibilityFilter(state.visibilityFilter, action)
+  };
+}
+```
+Esto es básicamente toda la idea de Redux. Tenga en cuenta que no hemos utilizado ninguna API de Redux. Ya se incluyen algunas utilidades para facilitar este patrón, pero la idea principal es que usted describe cómo su estado se actualiza con el tiempo en respuesta a los objetos de acción, y el 90% del código que se escribe es simplemente JavaScript, sin uso de Redux en si mismo, sus APIs, o cualquier magia.
+# Patrón Decorator y casos de uso
+Decorator (patrón de diseño)
+
+El patrón [Decorator](https://es.wikipedia.org/wiki/Decorator_(patr%C3%B3n_de_dise%C3%B1o)) responde a la necesidad de añadir dinámicamente funcionalidad a un Objeto. Esto nos permite no tener que crear sucesivas clases que hereden de la primera incorporando la nueva funcionalidad, sino otras que la implementan y se asocian a la primera.
+## Decorator motivation
+Un ejemplo para poder ver la aplicabilidad del patrón decorador podría ser el siguiente:
+
+Disponemos de una herramienta para crear interfaces gráﬁcas, que permite añadir funcionalidades como bordes o barras de desplazamiento a cualquier componente de la interfaz. Una posible solución sería utilizar la herencia para extender las responsabilidades de la clase. Si optamos por esta solución, estaríamos haciendo un diseño inflexible (estático), ya que el cliente no puede controlar cuándo y cómo decorar el componente con esa propiedad. La solución está en encapsular dentro de otro objeto, llamado Decorador, las nuevas responsabilidades. El decorador redirige las peticiones al componente y, además, puede realizar acciones adicionales antes y después de la redirección. De este modo, se pueden añadir decoradores con cualidades añadidas recursivamente.
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/decorator.png)
+En este diagrama de clases, podemos ver que la interfaz decorador implementa la interfaz del componente, redirigiendo todos los métodos al componente visual que encapsula. Las subclases decoradoras refinan los métodos del componente, añadiendo responsabilidades. También se puede ver que el cliente no necesita hacer distinción entre los componentes visuales decorados y los sin decorar.
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/secuencia.png)
+
+## Decorator Aplicabilidad
+Añadir responsabilidades a objetos individuales de forma dinámica y transparente Responsabilidades de un objeto pueden ser retiradas Cuando la extensión mediante la herencia no es viable Hay una necesidad de extender la funcionalidad de una clase, pero no hay razones para extenderlo a través de la herencia. Existe la necesidad de extender dinámicamente la funcionalidad de un objeto y quizás quitar la funcionalidad extendida.
+## Decorator: Estructura
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/decoratorgenerico.png)
+## Decorator: Participantes
+* Componente Deﬁne la interfaz para los objetos que pueden tener responsabilidades añadidas.
+* Componente Concreto Deﬁne un objeto al cual se le pueden agregar responsabilidades adicionales.
+* Decorador Mantiene una referencia al componente asociado. Implementa la interfaz de la superclase Componente delegando en el componente asociado.
+* Decorador Concreto Añade responsabilidades al componente.
+## Decorator Colaboraciones:
+El decorador redirige las peticiones al componente asociado. Opcionalmente puede realizar tareas adicionales antes y después de redirigir la petición.
+## Decorator Consecuencias
+Más flexible que la herencia. Al utilizar este patrón, se pueden añadir y eliminar responsabilidades en tiempo de ejecución. Además, evita la utilización de la herencia con muchas clases y también, en algunos casos, la herencia múltiple. Evita la aparición de clases con muchas responsabilidades en las clases superiores de la jerarquía. Este patrón nos permite ir incorporando de manera incremental responsabilidades. Genera gran cantidad de objetos pequeños. El uso de decoradores da como resultado sistemas formados por muchos objetos pequeños y parecidos. Puede haber problemas con la identidad de los objetos. Un decorador se comporta como un envoltorio transparente. Pero desde el punto de vista de la identidad de objetos, estos no son idénticos, por lo tanto no deberíamos apoyarnos en la identidad cuando estamos usando decoradores.
+## Decorator Implementación
+El patrón Decorator soluciona este problema de una manera mucho más sencilla y extensible.
+
+Se crea a partir de Ventana la subclase abstracta VentanaDecorator y, heredando de ella, BordeDecorator y BotonDeAyudaDecorator. VentanaDecorator encapsula el comportamiento de Ventana y utiliza composición recursiva para que sea posible añadir tantas “capas” de Decorators como se desee. Podemos crear tantos Decorators como queramos heredando de VentanaDecorator.
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/openclosed.png)
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/monkeypatching.png)
+![](https://raw.githubusercontent.com/JasanHdz/javascript-professional/master/assets/timeexecute.png)
+# Implementación del patrón Decorator
+`Documento HTML:`
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Decorator Patterns</title>
+</head>
+<body>
+  <div>
+    <h1>Decorator Desgin Patterns</h1>
+    <label for="email">Email</label>
+    <input type="text" id="email">
+  </div>
+</body>
+</html>
+```
+```js
+class Field {
+  errors: string[];
+  input: HTMLInputElement;
+
+  constructor(input: HTMLInputElement) {
+    this.input = input;
+    this.errors = [];
+
+    let errorMessage = document.createElement('p');
+    errorMessage.className = 'text-danger';
+    this.input.parentNode.insertBefore(errorMessage, this.input.nextSibling);
+
+    this.input.addEventListener('input', () => {
+      this.errors = [];
+      this.validate();
+      errorMessage.innerText = this.errors[0] || ' ';
+    })
+  }
+  validate() {}
+}
+
+function RequireFieldDecorator(field: Field): Field {
+  let validate = field.validate;
+
+  field.validate = function () {
+    validate()
+    let value = field.input.value;
+    if (!value) {
+      field.errors.push("Requisito");
+    }
+  };
+
+  return field;
+}
+
+function EmailFieldDecorator(field: Field): Field {
+  let validate = field.validate;
+
+  field.validate = function () {
+    validate()
+    let value = field.input.value;
+
+    if (value.indexOf("@") === -1) {
+      field.errors.push("Debe ser un email");
+    }
+
+  };
+  
+  return field;
+}
+
+let field = new Field(document.querySelector("#email"));
+RequireFieldDecorator(field);
+EmailFieldDecorator(RequireFieldDecorator(field));
+```
+# Publicar en NPM
+Para publicar en npm hay un requisito: necesitas una cuenta en npm, es gratis no cuesta nada, es muy fácil de hacer y esto es todo lo que vas a necesitar
