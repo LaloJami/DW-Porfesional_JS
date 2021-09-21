@@ -1,5 +1,12 @@
-# Curso Profesional de JS
+<div align="center">
+  <h1>JavaScript Profesional</h1>
+</div>
 
+## Tabla de Contenido
+- [Introduccion](#introducion)
+- [¿Qué significa ser un profesional de JavaScript?](#¿Qué-significa-ser-un-profesional-de-JavaScript?)
+- [¿Cómo llega un script al navegador?](#Cómo-llega-un-script-al-navegador)
+# Introducción
 ### ¿Qué significa ser un profesional de JavaScript?
 
 El camino para llegar a ser profesional es largo y duro, no es fácil. Todos necesitamos que nos guíen para saber qué hacer y qué no. Este camino es conocido como la ruta de pasar de Junior a Senior, este es un duro camino lleno de experiencia.
@@ -53,6 +60,10 @@ Esta es la parte más importante de ser un profesional. Un buen profesional cump
 ### Experiencia
 
 La experiencia no es algo que se pueda enseñar, tenemos que encontrarla nosotros mismos en el camino a ser profesionales. Todo está en nosotros, tenemos que estudiar y practicar mucho.
+
+<div align="right">
+  <small><a href="#tabla-de-contenido">🡡 volver al inicio</a></small>
+</div>
 
 # ¿Cómo llega un script al navegador?
 El DOM es la representación que hace el navegador de un documento HTML.
