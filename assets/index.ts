@@ -1,6 +1,6 @@
-import MediaPlayer from "./MediaPlayer.js";
-import AutoPlay from "./plugins/AutoPlay.js";
-import AutoPause from "./plugins/AutoPause.ts";
+import MediaPlayer from "./MediaPlayer";
+import AutoPlay from "./plugins/AutoPlay";
+import AutoPause from "./plugins/AutoPause";
 
 const video = document.querySelector("video");
 const player = new MediaPlayer({
@@ -12,9 +12,9 @@ const player = new MediaPlayer({
 });
 
 
-const button = document.querySelector("button");
-button.onclick = () => player.togglePlay();
-const muteButton = document.getElementById("mute-botton");
+const playButton: HTMLElement = document.querySelector("button");
+playButton.onclick = () => player.togglePlay();
+const muteButton: HTMLElement = document.getElementById("mute-botton");
 
 muteButton.onclick = () => player.toggleMute();
 
